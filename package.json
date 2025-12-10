@@ -1,0 +1,30 @@
+{
+  "name": "espotz-bnb",
+  "version": "1.0.0",
+  "description": "Espotz Prediction Market Smart Contracts for BNB Chain",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:gas": "REPORT_GAS=true hardhat test",
+    "coverage": "hardhat coverage",
+    "deploy:testnet": "hardhat run scripts/deploy.ts --network bscTestnet",
+    "deploy:mainnet": "hardhat run scripts/deploy.ts --network bscMainnet",
+    "verify": "hardhat verify --network bscTestnet",
+    "clean": "hardhat clean"
+  },
+  "keywords": [
+    "prediction-market",
+    "bnb-chain",
+    "esports",
+    "solidity"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.4.0",
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.22.0"
+  }
+}

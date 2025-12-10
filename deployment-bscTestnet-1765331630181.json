@@ -1,0 +1,11 @@
+{
+  "network": "bscTestnet",
+  "deployer": "0xD3dA38C22E29260FA96cccDeb570b9E783c1247b",
+  "timestamp": "2025-12-10T01:53:50.181Z",
+  "contracts": {
+    "USDT": "0x9a4A325c2Ff2aCA74246ef031C8891b2d1096113",
+    "CollateralVault": "0x9c1C147C35FC910141E18bDEd52A14ac40014c06",
+    "PredictionMarket": "0xbFac61515177aa5504131FC93643e507785AB165",
+    "Tournament": "0xaE855c89c23544129f9d0B8E414aCbc9B221dc59"
+  }
+}

@@ -32,12 +32,16 @@ export interface CollateralVaultInterface extends Interface {
       | "collateralToken"
       | "deauthorizeMarket"
       | "deposit"
+      | "depositFor"
+      | "depositForWithPermit"
+      | "depositWithPermit"
       | "getAvailableBalance"
       | "getLockedBalance"
       | "lockCollateral"
       | "lockedBalances"
       | "owner"
       | "renounceOwnership"
+      | "supportsPermit"
       | "totalDeposited"
       | "totalLocked"
       | "transferLockedCollateral"
@@ -52,6 +56,7 @@ export interface CollateralVaultInterface extends Interface {
       | "CollateralTransferred"
       | "CollateralUnlocked"
       | "Deposited"
+      | "DepositedFor"
       | "MarketAuthorized"
       | "MarketDeauthorized"
       | "OwnershipTransferred"
@@ -83,6 +88,25 @@ export interface CollateralVaultInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "depositFor",
+    values: [AddressLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "depositForWithPermit",
+    values: [
+      AddressLike,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BytesLike,
+      BytesLike
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "depositWithPermit",
+    values: [BigNumberish, BigNumberish, BigNumberish, BytesLike, BytesLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getAvailableBalance",
     values: [AddressLike]
   ): string;
@@ -101,6 +125,10 @@ export interface CollateralVaultInterface extends Interface {
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "supportsPermit",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -146,6 +174,15 @@ export interface CollateralVaultInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "depositFor", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "depositForWithPermit",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "depositWithPermit",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getAvailableBalance",
     data: BytesLike
@@ -165,6 +202,10 @@ export interface CollateralVaultInterface extends Interface {
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "supportsPermit",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -256,6 +297,28 @@ export namespace DepositedEvent {
   export type OutputTuple = [user: string, amount: bigint];
   export interface OutputObject {
     user: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace DepositedForEvent {
+  export type InputTuple = [
+    depositor: AddressLike,
+    recipient: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [
+    depositor: string,
+    recipient: string,
+    amount: bigint
+  ];
+  export interface OutputObject {
+    depositor: string;
+    recipient: string;
     amount: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -381,6 +444,37 @@ export interface CollateralVault extends BaseContract {
 
   deposit: TypedContractMethod<[amount: BigNumberish], [void], "nonpayable">;
 
+  depositFor: TypedContractMethod<
+    [user: AddressLike, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  depositForWithPermit: TypedContractMethod<
+    [
+      user: AddressLike,
+      amount: BigNumberish,
+      deadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+
+  depositWithPermit: TypedContractMethod<
+    [
+      amount: BigNumberish,
+      deadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+
   getAvailableBalance: TypedContractMethod<
     [user: AddressLike],
     [bigint],
@@ -400,6 +494,8 @@ export interface CollateralVault extends BaseContract {
   owner: TypedContractMethod<[], [string], "view">;
 
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
+
+  supportsPermit: TypedContractMethod<[], [boolean], "view">;
 
   totalDeposited: TypedContractMethod<[], [bigint], "view">;
 
@@ -448,6 +544,40 @@ export interface CollateralVault extends BaseContract {
     nameOrSignature: "deposit"
   ): TypedContractMethod<[amount: BigNumberish], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "depositFor"
+  ): TypedContractMethod<
+    [user: AddressLike, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "depositForWithPermit"
+  ): TypedContractMethod<
+    [
+      user: AddressLike,
+      amount: BigNumberish,
+      deadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "depositWithPermit"
+  ): TypedContractMethod<
+    [
+      amount: BigNumberish,
+      deadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "getAvailableBalance"
   ): TypedContractMethod<[user: AddressLike], [bigint], "view">;
   getFunction(
@@ -469,6 +599,9 @@ export interface CollateralVault extends BaseContract {
   getFunction(
     nameOrSignature: "renounceOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "supportsPermit"
+  ): TypedContractMethod<[], [boolean], "view">;
   getFunction(
     nameOrSignature: "totalDeposited"
   ): TypedContractMethod<[], [bigint], "view">;
@@ -523,6 +656,13 @@ export interface CollateralVault extends BaseContract {
     DepositedEvent.InputTuple,
     DepositedEvent.OutputTuple,
     DepositedEvent.OutputObject
+  >;
+  getEvent(
+    key: "DepositedFor"
+  ): TypedContractEvent<
+    DepositedForEvent.InputTuple,
+    DepositedForEvent.OutputTuple,
+    DepositedForEvent.OutputObject
   >;
   getEvent(
     key: "MarketAuthorized"
@@ -596,6 +736,17 @@ export interface CollateralVault extends BaseContract {
       DepositedEvent.InputTuple,
       DepositedEvent.OutputTuple,
       DepositedEvent.OutputObject
+    >;
+
+    "DepositedFor(address,address,uint256)": TypedContractEvent<
+      DepositedForEvent.InputTuple,
+      DepositedForEvent.OutputTuple,
+      DepositedForEvent.OutputObject
+    >;
+    DepositedFor: TypedContractEvent<
+      DepositedForEvent.InputTuple,
+      DepositedForEvent.OutputTuple,
+      DepositedForEvent.OutputObject
     >;
 
     "MarketAuthorized(address)": TypedContractEvent<

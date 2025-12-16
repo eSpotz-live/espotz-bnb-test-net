@@ -382,6 +382,21 @@ contract PredictionMarket is ReentrancyGuard, AccessControl {
         uint256 quantity,
         uint256 expireTime
     ) external nonReentrant returns (bytes32 orderId) {
+        return _placeOrderInternal(marketId, side, outcome, price, quantity, expireTime);
+    }
+
+    /**
+     * @notice Internal function to place a limit order
+     * @dev Called by placeOrder, depositAndPlaceOrder, and depositWithPermitAndPlaceOrder
+     */
+    function _placeOrderInternal(
+        bytes32 marketId,
+        OrderSide side,
+        Outcome outcome,
+        uint256 price,
+        uint256 quantity,
+        uint256 expireTime
+    ) internal returns (bytes32 orderId) {
         Market storage market = markets[marketId];
         if (market.status != MarketStatus.Active) revert MarketNotActive();
         if (price == 0 || price >= BASIS_POINTS) revert InvalidPrice();
@@ -432,6 +447,74 @@ contract PredictionMarket is ReentrancyGuard, AccessControl {
         _matchOrder(orderId);
 
         return orderId;
+    }
+
+    /**
+     * @notice Deposit to vault and place order in a single transaction
+     * @dev Auto-deposits required amount if vault balance is insufficient
+     * @param depositAmount Amount to deposit (0 if user already has sufficient balance)
+     * @param marketId The market to trade on
+     * @param side BUY or SELL
+     * @param outcome YES or NO
+     * @param price Price in basis points (0-10000)
+     * @param quantity Number of shares
+     * @param expireTime Order expiration timestamp
+     * @return orderId The ID of the placed order
+     */
+    function depositAndPlaceOrder(
+        uint256 depositAmount,
+        bytes32 marketId,
+        OrderSide side,
+        Outcome outcome,
+        uint256 price,
+        uint256 quantity,
+        uint256 expireTime
+    ) external nonReentrant returns (bytes32 orderId) {
+        // Auto-deposit if amount provided
+        if (depositAmount > 0) {
+            vault.depositFor(msg.sender, depositAmount);
+        }
+
+        // Place order (reusing internal logic)
+        return _placeOrderInternal(marketId, side, outcome, price, quantity, expireTime);
+    }
+
+    /**
+     * @notice Deposit with permit and place order in a single transaction (gasless approval)
+     * @dev Uses EIP-2612 permit for gasless token approval
+     * @param depositAmount Amount to deposit
+     * @param marketId The market to trade on
+     * @param side BUY or SELL
+     * @param outcome YES or NO
+     * @param price Price in basis points (0-10000)
+     * @param quantity Number of shares
+     * @param expireTime Order expiration timestamp
+     * @param deadline Permit deadline timestamp
+     * @param v ECDSA signature v parameter
+     * @param r ECDSA signature r parameter
+     * @param s ECDSA signature s parameter
+     * @return orderId The ID of the placed order
+     */
+    function depositWithPermitAndPlaceOrder(
+        uint256 depositAmount,
+        bytes32 marketId,
+        OrderSide side,
+        Outcome outcome,
+        uint256 price,
+        uint256 quantity,
+        uint256 expireTime,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external nonReentrant returns (bytes32 orderId) {
+        // Deposit with permit if amount provided
+        if (depositAmount > 0) {
+            vault.depositForWithPermit(msg.sender, depositAmount, deadline, v, r, s);
+        }
+
+        // Place order (reusing internal logic)
+        return _placeOrderInternal(marketId, side, outcome, price, quantity, expireTime);
     }
 
     /**
@@ -935,5 +1018,44 @@ contract PredictionMarket is ReentrancyGuard, AccessControl {
         OrderSide side
     ) external view returns (bytes32[] memory) {
         return orderBook[marketId][outcome][side];
+    }
+
+    /**
+     * @notice Calculate collateral required for an order (public view for frontend)
+     * @param side BUY or SELL
+     * @param price Price in basis points (0-10000)
+     * @param quantity Number of shares
+     * @return collateralRequired Amount of collateral needed
+     */
+    function calculateCollateralRequired(
+        OrderSide side,
+        uint256 price,
+        uint256 quantity
+    ) external pure returns (uint256) {
+        return _calculateCollateral(side, price, quantity);
+    }
+
+    /**
+     * @notice Calculate deposit amount needed for an order
+     * @dev Returns 0 if user has sufficient balance, otherwise returns the shortfall
+     * @param user Address of the user
+     * @param side BUY or SELL
+     * @param price Price in basis points (0-10000)
+     * @param quantity Number of shares
+     * @return depositNeeded Amount user needs to deposit (0 if sufficient)
+     */
+    function calculateDepositNeeded(
+        address user,
+        OrderSide side,
+        uint256 price,
+        uint256 quantity
+    ) external view returns (uint256) {
+        uint256 collateralRequired = _calculateCollateral(side, price, quantity);
+        uint256 availableBalance = vault.getAvailableBalance(user);
+
+        if (availableBalance >= collateralRequired) {
+            return 0;
+        }
+        return collateralRequired - availableBalance;
     }
 }

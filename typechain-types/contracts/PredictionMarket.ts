@@ -117,11 +117,15 @@ export interface PredictionMarketInterface extends Interface {
       | "BASIS_POINTS"
       | "DEFAULT_ADMIN_ROLE"
       | "OPERATOR_ROLE"
+      | "calculateCollateralRequired"
+      | "calculateDepositNeeded"
       | "cancelMarket"
       | "cancelOrder"
       | "claimRefund"
       | "claimWinnings"
       | "createMarket"
+      | "depositAndPlaceOrder"
+      | "depositWithPermitAndPlaceOrder"
       | "getMarket"
       | "getMarketIds"
       | "getOrder"
@@ -180,6 +184,14 @@ export interface PredictionMarketInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "calculateCollateralRequired",
+    values: [BigNumberish, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "calculateDepositNeeded",
+    values: [AddressLike, BigNumberish, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "cancelMarket",
     values: [BytesLike]
   ): string;
@@ -198,6 +210,34 @@ export interface PredictionMarketInterface extends Interface {
   encodeFunctionData(
     functionFragment: "createMarket",
     values: [BytesLike, string, BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "depositAndPlaceOrder",
+    values: [
+      BigNumberish,
+      BytesLike,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "depositWithPermitAndPlaceOrder",
+    values: [
+      BigNumberish,
+      BytesLike,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BytesLike,
+      BytesLike
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "getMarket",
@@ -304,6 +344,14 @@ export interface PredictionMarketInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "calculateCollateralRequired",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "calculateDepositNeeded",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "cancelMarket",
     data: BytesLike
   ): Result;
@@ -321,6 +369,14 @@ export interface PredictionMarketInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "createMarket",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "depositAndPlaceOrder",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "depositWithPermitAndPlaceOrder",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getMarket", data: BytesLike): Result;
@@ -773,6 +829,23 @@ export interface PredictionMarket extends BaseContract {
 
   OPERATOR_ROLE: TypedContractMethod<[], [string], "view">;
 
+  calculateCollateralRequired: TypedContractMethod<
+    [side: BigNumberish, price: BigNumberish, quantity: BigNumberish],
+    [bigint],
+    "view"
+  >;
+
+  calculateDepositNeeded: TypedContractMethod<
+    [
+      user: AddressLike,
+      side: BigNumberish,
+      price: BigNumberish,
+      quantity: BigNumberish
+    ],
+    [bigint],
+    "view"
+  >;
+
   cancelMarket: TypedContractMethod<
     [marketId: BytesLike],
     [void],
@@ -797,6 +870,38 @@ export interface PredictionMarket extends BaseContract {
       operator: AddressLike
     ],
     [void],
+    "nonpayable"
+  >;
+
+  depositAndPlaceOrder: TypedContractMethod<
+    [
+      depositAmount: BigNumberish,
+      marketId: BytesLike,
+      side: BigNumberish,
+      outcome: BigNumberish,
+      price: BigNumberish,
+      quantity: BigNumberish,
+      expireTime: BigNumberish
+    ],
+    [string],
+    "nonpayable"
+  >;
+
+  depositWithPermitAndPlaceOrder: TypedContractMethod<
+    [
+      depositAmount: BigNumberish,
+      marketId: BytesLike,
+      side: BigNumberish,
+      outcome: BigNumberish,
+      price: BigNumberish,
+      quantity: BigNumberish,
+      expireTime: BigNumberish,
+      deadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike
+    ],
+    [string],
     "nonpayable"
   >;
 
@@ -998,6 +1103,25 @@ export interface PredictionMarket extends BaseContract {
     nameOrSignature: "OPERATOR_ROLE"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "calculateCollateralRequired"
+  ): TypedContractMethod<
+    [side: BigNumberish, price: BigNumberish, quantity: BigNumberish],
+    [bigint],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "calculateDepositNeeded"
+  ): TypedContractMethod<
+    [
+      user: AddressLike,
+      side: BigNumberish,
+      price: BigNumberish,
+      quantity: BigNumberish
+    ],
+    [bigint],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "cancelMarket"
   ): TypedContractMethod<[marketId: BytesLike], [void], "nonpayable">;
   getFunction(
@@ -1019,6 +1143,40 @@ export interface PredictionMarket extends BaseContract {
       operator: AddressLike
     ],
     [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "depositAndPlaceOrder"
+  ): TypedContractMethod<
+    [
+      depositAmount: BigNumberish,
+      marketId: BytesLike,
+      side: BigNumberish,
+      outcome: BigNumberish,
+      price: BigNumberish,
+      quantity: BigNumberish,
+      expireTime: BigNumberish
+    ],
+    [string],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "depositWithPermitAndPlaceOrder"
+  ): TypedContractMethod<
+    [
+      depositAmount: BigNumberish,
+      marketId: BytesLike,
+      side: BigNumberish,
+      outcome: BigNumberish,
+      price: BigNumberish,
+      quantity: BigNumberish,
+      expireTime: BigNumberish,
+      deadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike
+    ],
+    [string],
     "nonpayable"
   >;
   getFunction(

@@ -2,13 +2,15 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
 /**
  * @title MockUSDT
- * @notice Mock USDT token for testing purposes
+ * @notice Mock USDT token for testing purposes with EIP-2612 permit support
+ * @dev Implements ERC20Permit for gasless approvals via signatures
  */
-contract MockUSDT is ERC20 {
-    constructor() ERC20("Mock USDT", "USDT") {}
+contract MockUSDT is ERC20, ERC20Permit {
+    constructor() ERC20("Mock USDT", "USDT") ERC20Permit("Mock USDT") {}
 
     /**
      * @notice Mint tokens to an address (for testing)

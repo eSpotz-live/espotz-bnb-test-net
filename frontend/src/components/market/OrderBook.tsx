@@ -43,21 +43,21 @@ function OrderRow({ orderId, color }: { orderId: `0x${string}`; color: string })
 
   if (remainingNum <= 0) return null;
 
-  // Format price from basis points to percentage (5000 -> 50%)
-  const pricePercent = (priceNum / 100).toFixed(0);
+  // Format price from basis points to cents (5000 -> 50¢)
+  const priceCents = (priceNum / 100).toFixed(0);
   // Calculate total value
   const totalValue = (remainingNum * priceNum) / 10000;
 
   return (
     <div className="grid grid-cols-3 gap-2 text-sm py-1 px-2 hover:bg-gray-800/50 rounded">
       <div className={`font-semibold ${color}`}>
-        {pricePercent}%
+        {priceCents}¢
       </div>
       <div className="text-gray-300 text-right">
         {formatUnits(BigInt(Math.floor(remainingNum)), 6)}
       </div>
       <div className="text-gray-500 text-right text-xs">
-        {formatUnits(BigInt(Math.floor(totalValue)), 6)} USDT
+        ${formatUnits(BigInt(Math.floor(totalValue)), 6)}
       </div>
     </div>
   );

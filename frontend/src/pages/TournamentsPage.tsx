@@ -4,6 +4,7 @@ import { useTournamentIds } from '@/hooks/useTournament';
 import { Navigation } from '@/components/layout/Navigation';
 import { CreateTournamentModal } from '@/components/tournament/CreateTournamentModal';
 import { Footer } from '@/components/layout/Footer';
+import { FaucetButton } from '@/components/common/FaucetButton';
 
 export default function TournamentsPage() {
   const { data: tournamentIds, isLoading, error } = useTournamentIds();
@@ -25,13 +26,16 @@ export default function TournamentsPage() {
               <h1 className="text-4xl font-bold mb-2">Tournaments</h1>
               <p className="text-gray-400">Compete in organized esports prediction tournaments</p>
             </div>
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="btn-primary flex items-center gap-2"
-            >
-              <span className="text-xl">+</span>
-              Create Tournament
-            </button>
+            <div className="flex items-center gap-3">
+              <FaucetButton variant="compact" showBalance />
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="btn-primary flex items-center gap-2"
+              >
+                <span className="text-xl">+</span>
+                Create Tournament
+              </button>
+            </div>
           </div>
         </div>
 

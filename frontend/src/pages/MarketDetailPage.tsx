@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { useMarket, useUserOrders, useOrder } from '@/hooks/usePredictionMarket';
+import { useMarketPrice } from '@/hooks/useMarketPrice';
 import { OrderBook } from '@/components/market/OrderBook';
 import { TradingInterface } from '@/components/market/TradingInterface';
 import { CancelOrderButton } from '@/components/trading/CancelOrderButton';
@@ -63,10 +64,10 @@ function UserOrderRow({ orderId, marketId }: { orderId: `0x${string}`; marketId:
         </div>
         <div>
           <p className="text-xs text-gray-400">Price</p>
-          <p className="font-semibold">{(priceNum / 100).toFixed(0)}%</p>
+          <p className="font-semibold">{(priceNum / 100).toFixed(0)}¢</p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">Quantity</p>
+          <p className="text-xs text-gray-400">Shares</p>
           <p className="font-semibold">{formatUnits(BigInt(Math.floor(quantityNum)), 6)}</p>
         </div>
         <div>
@@ -86,6 +87,7 @@ export default function MarketDetailPage() {
   const { address, isConnected } = useAccount();
   const { data: market, isLoading, error } = useMarket(marketId as `0x${string}`);
   const { data: userOrders } = useUserOrders(address);
+  const { yesPrice, noPrice, yesBid, yesAsk, noBid, noAsk } = useMarketPrice(marketId as `0x${string}`);
 
   if (isLoading) {
     return (
@@ -186,18 +188,42 @@ export default function MarketDetailPage() {
             </span>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
+          {/* Price Display - Polymarket Style */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-lg font-semibold text-gray-300">Yes</span>
+                <span className="text-3xl font-bold text-green-400">{yesPrice}¢</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Bid: {yesBid !== null ? `${yesBid}¢` : '-'}</span>
+                <span className="text-gray-500">Ask: {yesAsk !== null ? `${yesAsk}¢` : '-'}</span>
+              </div>
+            </div>
+            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-lg font-semibold text-gray-300">No</span>
+                <span className="text-3xl font-bold text-red-400">{noPrice}¢</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Bid: {noBid !== null ? `${noBid}¢` : '-'}</span>
+                <span className="text-gray-500">Ask: {noAsk !== null ? `${noAsk}¢` : '-'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div>
               <p className="text-sm text-gray-400 mb-1">Total Volume</p>
-              <p className="text-2xl font-bold">{totalVolume.toFixed(2)} USDT</p>
+              <p className="text-xl font-bold">${totalVolume.toFixed(0)}</p>
             </div>
             <div>
               <p className="text-sm text-gray-400 mb-1">YES Supply</p>
-              <p className="text-2xl font-bold text-green-400">{formatUnits(yesSupply, 6)}</p>
+              <p className="text-xl font-bold text-green-400">{formatUnits(yesSupply, 6)}</p>
             </div>
             <div>
               <p className="text-sm text-gray-400 mb-1">NO Supply</p>
-              <p className="text-2xl font-bold text-red-400">{formatUnits(noSupply, 6)}</p>
+              <p className="text-xl font-bold text-red-400">{formatUnits(noSupply, 6)}</p>
             </div>
             <div>
               <p className="text-sm text-gray-400 mb-1">Expiry</p>

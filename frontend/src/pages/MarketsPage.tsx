@@ -3,6 +3,7 @@ import { MarketCard } from '@/components/market/MarketCard';
 import { useMarketIds } from '@/hooks/usePredictionMarket';
 import { Navigation } from '@/components/layout/Navigation';
 import { Footer } from '@/components/layout/Footer';
+import { FaucetButton } from '@/components/common/FaucetButton';
 
 export default function MarketsPage() {
   const { data: marketIds, isLoading, error } = useMarketIds();
@@ -18,8 +19,13 @@ export default function MarketsPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Prediction Markets</h1>
-          <p className="text-gray-400">Trade on the outcomes of esports events</p>
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Prediction Markets</h1>
+              <p className="text-gray-400">Trade on the outcomes of esports events</p>
+            </div>
+            <FaucetButton variant="compact" showBalance />
+          </div>
         </div>
 
         {/* Filters and Search */}

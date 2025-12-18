@@ -1,7 +1,8 @@
 # Dependencies
 node_modules/
 .pnpm-store/
-
+# brand assets
+public/
 # Next.js
 .next/
 out/

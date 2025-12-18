@@ -8,3 +8,9 @@ espotz-brand-assets/
 
 # Local Netlify folder
 .netlify
+
+# frontend
+
+node_modules/
+espotz-brand-assets/
+frontend/public/

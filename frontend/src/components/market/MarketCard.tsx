@@ -1,6 +1,7 @@
 'use client';
 
 import { useMarket } from '@/hooks/usePredictionMarket';
+import { useMarketDisplayPrice } from '@/hooks/useMarketPrice';
 import { formatUnits } from 'viem';
 import { format } from 'date-fns';
 
@@ -10,6 +11,7 @@ interface MarketCardProps {
 
 export function MarketCard({ marketId }: MarketCardProps) {
   const { data: market, isLoading, error } = useMarket(marketId);
+  const { yesPrice, noPrice, isLoading: priceLoading } = useMarketDisplayPrice(marketId);
 
   if (isLoading) {
     return (
@@ -28,17 +30,13 @@ export function MarketCard({ marketId }: MarketCardProps) {
   // Solidity structs return as objects - use exact field names from ABI
   const {
     question,
-    yesSupply,
-    noSupply,
     totalCollateral,
     status,
     winningOutcome,
     expireTime,
-    tournamentOperator
   } = market as any;
 
   // MarketStatus enum: 0=Active, 1=Paused, 2=Resolved, 3=Cancelled
-  const isActive = Number(status) === 0;
   const isPaused = Number(status) === 1;
   const isResolved = Number(status) === 2;
   const isCancelled = Number(status) === 3;
@@ -66,38 +64,43 @@ export function MarketCard({ marketId }: MarketCardProps) {
   }
 
   return (
-    <a href={`/markets/${marketId}`} className="card p-6 hover:shadow-lg transition-shadow">
+    <a href={`/markets/${marketId}`} className="card p-6 hover:shadow-lg transition-shadow group">
       <div className="flex justify-between items-start mb-4">
-        <h3 className="text-lg font-semibold line-clamp-2 flex-1">{question}</h3>
-        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColor} ml-2`}>
+        <h3 className="text-lg font-semibold line-clamp-2 flex-1 group-hover:text-cyan-400 transition">{question}</h3>
+        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColor} ml-2 shrink-0`}>
           {statusText}
         </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <p className="text-sm text-gray-400 mb-1">Total Volume</p>
-          <p className="text-xl font-bold">{totalVolume.toFixed(2)} USDT</p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-400 mb-1">Expiry</p>
-          <p className="text-sm font-semibold">{format(expiryDate, 'MMM dd, yyyy')}</p>
-          <p className="text-xs text-gray-500">{format(expiryDate, 'HH:mm')}</p>
-        </div>
+      {/* Price Buttons - Polymarket Style */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <button className="bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 rounded-lg p-3 text-left transition">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-300">Yes</span>
+            <span className="text-lg font-bold text-green-400">
+              {priceLoading ? '...' : `${yesPrice}¢`}
+            </span>
+          </div>
+        </button>
+        <button className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-lg p-3 text-left transition">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-300">No</span>
+            <span className="text-lg font-bold text-red-400">
+              {priceLoading ? '...' : `${noPrice}¢`}
+            </span>
+          </div>
+        </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
-          <p className="text-xs text-gray-400 mb-1">YES Shares</p>
-          <p className="text-sm font-semibold text-green-400">
-            {formatUnits(yesSupply || 0n, 6)}
-          </p>
+      {/* Volume and Expiry */}
+      <div className="flex justify-between items-center text-sm text-gray-400">
+        <div className="flex items-center gap-1">
+          <span className="text-gray-500">Vol:</span>
+          <span className="font-semibold text-gray-300">${totalVolume.toFixed(0)}</span>
         </div>
-        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-          <p className="text-xs text-gray-400 mb-1">NO Shares</p>
-          <p className="text-sm font-semibold text-red-400">
-            {formatUnits(noSupply || 0n, 6)}
-          </p>
+        <div className="flex items-center gap-1">
+          <span className="text-gray-500">Ends:</span>
+          <span className="font-medium">{format(expiryDate, 'MMM dd')}</span>
         </div>
       </div>
     </a>
